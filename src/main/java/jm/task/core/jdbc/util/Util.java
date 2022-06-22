@@ -19,7 +19,7 @@ public final class Util {
         }
     }
 
-    private Connection openConnection() {
+    private static Connection openConnection() {
         try {
             connection = DriverManager.getConnection(PropertiesUtil.get(URl_KEY), PropertiesUtil.get(LOGIN_KEY), PropertiesUtil.get(PASS_KEY));
             System.out.println("Connection was opened");
@@ -30,7 +30,7 @@ public final class Util {
         }
     }
 
-    public void closeConnection() {
+    public static void closeConnection() {
         try {
             if (!connection.isClosed()) connection.close();
             System.out.println("Connection was closed");
@@ -39,7 +39,7 @@ public final class Util {
         }
     }
 
-    public Connection getConnection() {
+    public static Connection getConnection() {
         try {
             if (connection == null || connection.isClosed()) {
                 connection = openConnection();
