@@ -25,14 +25,13 @@ public final class Util {
             System.out.println("Connection was opened");
             return connection;
         } catch (SQLException e) {
-            System.out.println("error");
             throw new RuntimeException(e);
         }
     }
 
     public static void closeConnection() {
         try {
-            if (!connection.isClosed()) connection.close();
+            if (!connection.isClosed() || connection != null) connection.close();
             System.out.println("Connection was closed");
         } catch (SQLException e) {
             throw new RuntimeException(e);

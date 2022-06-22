@@ -8,9 +8,7 @@ public final class PropertiesUtil {
 
     private PropertiesUtil() {
     }
-
     private static final Properties PROPERTIES = new Properties();
-
     public static String get(String key) {
         return PROPERTIES.getProperty(key);
     }
