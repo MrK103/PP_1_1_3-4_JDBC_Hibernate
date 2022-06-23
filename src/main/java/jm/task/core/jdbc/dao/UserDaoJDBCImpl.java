@@ -50,6 +50,11 @@ public class UserDaoJDBCImpl implements UserDao {
             connection.commit();
             System.out.println(name + " was successfully added to the database");
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             e.printStackTrace();
         }
     }
@@ -60,6 +65,11 @@ public class UserDaoJDBCImpl implements UserDao {
             connection.commit();
             System.out.printf("The user with id \"%d\" was successfully deleted\n", id);
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             throw new RuntimeException(e);
         }
     }
@@ -89,6 +99,11 @@ public class UserDaoJDBCImpl implements UserDao {
             connection.commit();
             System.out.println("All users have been deleted");
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             throw new RuntimeException(e);
         }
     }
