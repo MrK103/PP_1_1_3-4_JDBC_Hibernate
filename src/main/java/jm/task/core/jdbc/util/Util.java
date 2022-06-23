@@ -11,24 +11,6 @@ public final class Util {
     private static final String LOGIN_KEY = "db.login";
     private static final String PASS_KEY = "db.password";
 
-    static {
-        try {
-            Class.forName(PropertiesUtil.get(DRIVER_KEY));
-        } catch (ClassNotFoundException e) {
-            e.getStackTrace();
-        }
-    }
-
-    private static Connection openConnection() {
-        try {
-            connection = DriverManager.getConnection(PropertiesUtil.get(URl_KEY), PropertiesUtil.get(LOGIN_KEY), PropertiesUtil.get(PASS_KEY));
-            System.out.println("Connection was opened");
-            return connection;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static void closeConnection() {
         try {
             if (!connection.isClosed() || connection != null) connection.close();
@@ -41,7 +23,14 @@ public final class Util {
     public static Connection getConnection() {
         try {
             if (connection == null || connection.isClosed()) {
-                connection = openConnection();
+                try {
+                    Class.forName(PropertiesUtil.get(DRIVER_KEY));
+                    connection = DriverManager.getConnection(PropertiesUtil.get(URl_KEY), PropertiesUtil.get(LOGIN_KEY), PropertiesUtil.get(PASS_KEY));
+                    connection.setAutoCommit(false);
+                    System.out.println("Connection was opened");
+                } catch (SQLException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);

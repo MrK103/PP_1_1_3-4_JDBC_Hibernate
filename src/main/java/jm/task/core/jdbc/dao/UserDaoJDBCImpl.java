@@ -47,6 +47,7 @@ public class UserDaoJDBCImpl implements UserDao {
             statement.setString(2, lastName);
             statement.setByte(3, age);
             statement.executeUpdate();
+            connection.commit();
             System.out.println(name + " was successfully added to the database");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -54,8 +55,9 @@ public class UserDaoJDBCImpl implements UserDao {
     }
     public void removeUserById(long id) {
         String sql = ("delete from user where id = " + id);
-        try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate(sql);
+        try (var statement = connection.prepareStatement(sql)) {
+            statement.executeUpdate();
+            connection.commit();
             System.out.printf("The user with id \"%d\" was successfully deleted\n", id);
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -65,13 +67,12 @@ public class UserDaoJDBCImpl implements UserDao {
     public List<User> getAllUsers() {
         String sql = ("select * from user");
         List<User> userList = new ArrayList<>();
-        try (Statement statement = connection.createStatement()) {
-            ResultSet rs = statement.executeQuery(sql);
-            while (rs.next()){
+        try (var resultSet = connection.createStatement().executeQuery(sql)) {
+            while (resultSet.next()){
                 User user = new User(
-                        rs.getString("name"),
-                        rs.getString("lastName"),
-                        rs.getByte("age")
+                        resultSet.getString("name"),
+                        resultSet.getString("lastName"),
+                        resultSet.getByte("age")
                 );
                 userList.add(user);
             }
@@ -82,8 +83,10 @@ public class UserDaoJDBCImpl implements UserDao {
     }
 
     public void cleanUsersTable() {
-        try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate("truncate table user;");
+        String sql = "truncate table user;";
+        try (var statement = connection.prepareStatement(sql)) {
+            statement.executeUpdate();
+            connection.commit();
             System.out.println("All users have been deleted");
         } catch (SQLException e) {
             throw new RuntimeException(e);
