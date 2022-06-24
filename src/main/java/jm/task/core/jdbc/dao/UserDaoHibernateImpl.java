@@ -6,8 +6,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import javax.persistence.criteria.CriteriaQuery;
-import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,12 +19,11 @@ public class UserDaoHibernateImpl implements UserDao {
 
     }
 
-
     @Override
     public void createUsersTable() {
         try (Session session = factory.openSession()) {
             transaction = session.beginTransaction();
-            session.createNativeQuery("""
+            session.createSQLQuery("""
                     create table if not exists user(
                         id int auto_increment primary key ,
                         name varchar(128) not null,
@@ -47,7 +44,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public void dropUsersTable() {
         try (Session session = factory.openSession()) {
             transaction = session.beginTransaction();
-            session.createNativeQuery("""
+            session.createSQLQuery("""
                     drop table if exists user;
                     """).executeUpdate();
             transaction.commit();
@@ -62,7 +59,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public void saveUser(String name, String lastName, byte age) {
         try (Session session = factory.openSession()) {
             transaction = session.beginTransaction();
-            session.save(new User(name, lastName, age));
+            session.persist(new User(name, lastName, age));
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
@@ -75,7 +72,9 @@ public class UserDaoHibernateImpl implements UserDao {
     public void removeUserById(long id) {
         try (Session session = factory.openSession()) {
             transaction = session.beginTransaction();
-            session.delete(session.get(User.class, id));
+            session.createQuery("DELETE from User WHERE id = :id")
+                    .setParameter("id", id)
+                    .executeUpdate();
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
@@ -88,10 +87,8 @@ public class UserDaoHibernateImpl implements UserDao {
     public List<User> getAllUsers() {
         List<User> userList = new ArrayList<>();
         try (Session session = factory.openSession()) {
-            CriteriaQuery<User> criteriaQuery = session.getCriteriaBuilder().createQuery(User.class);
-            criteriaQuery.from(User.class);
             transaction = session.beginTransaction();
-            userList = session.createQuery(criteriaQuery).getResultList();
+            userList = session.createQuery("from User").getResultList();
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
@@ -105,7 +102,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public void cleanUsersTable() {
         try (Session session = factory.openSession()) {
             transaction = session.beginTransaction();
-            session.createNativeQuery("TRUNCATE TABLE user;").executeUpdate();
+            session.createSQLQuery("TRUNCATE TABLE user;").executeUpdate();
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
